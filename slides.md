@@ -17,10 +17,8 @@ transition: slide-left
 mdc: true
 ---
 
-# Communication par events asynchrones
-
-Mode d'emploi chez Ovrsea
-
+# Communicating with async events
+At OVRSEA
 <!--
 Notes
 -->
@@ -29,9 +27,8 @@ Notes
 layout: two-cols
 ---
 
-# Opération Synchrone
-
-Bloquant et impactant
+# Sync operation
+Blocks the execution and couples the implementation
 
 ```ts {monaco-run} {autorun:false}
 const sendEmail = async () => {
@@ -48,9 +45,8 @@ console.log("Done")
 
 ::right::
 
-# Opération Asynchrone
-
-Non bloquant mais impactant
+# Async operation
+Doesn't block the execution but couples the implementation
 ```ts {monaco-run} {autorun:false}
 const sendEmail = async () => {
   await new Promise(res => setTimeout(res, 2000));
@@ -68,7 +64,7 @@ console.log("Done")
 <!--
 - Les appels synchrones bloquent le code
 - L'asynchrone permet de gagner du temps, ex en front ou avec des opérations qui ne sont pas core
-- Dans les 2 cas, la fonction appelée peut throw, et son domaine leak alors qu'on a pas forcément envie
+- Dans les 2 cas, la fonction appelée peut throw (ou pas), et son domaine leak alors qu'on a pas forcément envie
 -->
 
 ---
@@ -76,9 +72,9 @@ layout: image-right
 image: https://cover.sli.dev
 ---
 
-# Evenement Asynchrone
+# Async event
 
-Code non bloquant et impact délégué
+Non blocking and no implementation
 ```ts
 // Create shipment mutation resolver
 
@@ -96,24 +92,24 @@ console.log("Done")
 
 # Events, Event Driven Development
 
-- Excellent moyen de découpler le métier et de produire une architecture scalable
+- Excellent way to decouple contexts, and produce scalable code
 ```ts
 // core/tracking/updateTracking.ts
 
 emit("shipmentDeparted")
-// Le tracking n'a que faire de mettre à jour les status, les tâches, les emails, etc
+// Tracking doesn't care about updating statuses, tasks, emails, etc
 ```
 
-- Permettent de lancer des commandes
+- Allow to launch commands
 ```ts
-// Pour du découplage plus technique 
+// Avoids technical coupling
 on("EMAIL_SendBookingRequestAskedEmailCommand", (payload) => sendBookingRequestEmail(payload.shipmentId))
 
-// Pour se simplifier la vie lors d'opérations manuelles
+// Simplifies manual tech operations
 on("resyncTracking", (payload) => resyncTracking(payload.shipmentId))
 ```
 
-- Nécessité de stocker les messages (Event Log) pour remonter le fil d'exécution
+- Need to store an event log to keep track of the history
 
 
 
@@ -122,10 +118,10 @@ on("resyncTracking", (payload) => resyncTracking(payload.shipmentId))
 
 # SNS
 
-- Solution AWS
-- Permet de trigger les composants d'une architecture distribuée
-- Rien à implémenter
-- Intégration naturelle avec l'écosystème AWS
+- AWS Solution
+- Allows to trigger the components of a distributed architecture
+- Nothing to implement
+- Natural integration with AWS ecosystem
 
 <br>
 <br>
@@ -159,10 +155,10 @@ flowchart LR
 
 # Emittery
 
-- Librairie JS Open-Source
-- Monolithe modulaire: SNS n'a plus de sens pour tout ce qui ne regarde pas l'architecture distribuée
-- Plus léger, plus rapide (pas de broker de messages, rien de distribué)
-- Solution plus personnalisable et controlable
+- Open source JS lib
+- Modular monolith: SNS makes no sens now that our architecture is not distributed anymore
+- Lighter, faster, (no message broker, no network calls)
+- More customisable, more control
 
 <br>
 <br>
@@ -210,25 +206,23 @@ layout: image-right
 image: https://cover.sli.dev
 ---
 
-# Gestion des erreurs
+# Error handling
 
-- Tous les messages sont sauvegardés dans une db
-- En cas d'erreur, retry auto
-- Rejouabilité à la main ou via Retool par exemple
-
+- All event messages are saved into a DB
+- Auto-retry when error
+- Replayability
 
 ---
 layout: image-right
 image: https://cover.sli.dev
 ---
 
-# Types de subscriber
+# Subscriber types
 
-- Possible de subscribe de 3 façons:
-  - Async: le publisher resolve immédiatement
-  - Sync: le publisher ne resolve que quand le subscriber resolve
-  - Serial: Async mais les subscribers sont executés en série et non pas en parallèle
-
+- 3 ways to subscribe:
+  - Async: publisher resolvers immediatly
+  - Sync: publisher waits for subscribers to resolve
+  - Serial: Async but subscriber are executed in series instead of parallel
 ---
 layout: image-right
 image: https://cover.sli.dev
@@ -236,10 +230,10 @@ image: https://cover.sli.dev
 
 # Code dives
 
-- Core de notre implem emittery
-- Exemples de publish/subscribes
-- DB des messages
-- Command runner et rejouabilité
+- Core implementation
+- Publish/subscribes examples
+- Messages database
+- Command runner, replay
 
 <!--
 - subscribers sync: microservices/core/services/orders/api/subscriber.ts
